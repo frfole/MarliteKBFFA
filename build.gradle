@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+group 'code.frfole'
+version '0.1'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spongepowered.org/maven' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.Minestom:Minestom:b37bef427f'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+test {
+    useJUnitPlatform()
+}
