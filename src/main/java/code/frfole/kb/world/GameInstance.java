@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameInstance extends InstanceContainer {
 
-    private final Map<String, Zone> zones;
+    public final Map<String, Zone> zones;
 
     @SuppressWarnings("UnstableApiUsage")
     public GameInstance(@NotNull UUID uniqueId, @NotNull DimensionType dimensionType, @Nullable IChunkLoader loader) {

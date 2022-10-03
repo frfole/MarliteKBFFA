@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Set;
 
 public record Zone(Point posMin, Point posMax, Set<Flag> flags) {
@@ -36,6 +37,26 @@ public record Zone(Point posMin, Point posMax, Set<Flag> flags) {
         for (Flag flag : flags) {
             if (flag.type() == flagType) {
                 return flag.value();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the value of given flag from collection of zone for the given point.
+     * @param zones The collection of zones to check.
+     * @param flagType The flag type to get.
+     * @param point The point to check.
+     * @return The value of the flag, or {@code null} if the flag is not set.
+     */
+    @Contract(pure = true)
+    public static @Nullable Boolean flagValue(Collection<Zone> zones, Flag.FlagType flagType, Point point) {
+        for (Zone zone : zones) {
+            if (zone.contains(point)) {
+                Boolean value = zone.flagValue(flagType);
+                if (value != null) {
+                    return value;
+                }
             }
         }
         return null;
