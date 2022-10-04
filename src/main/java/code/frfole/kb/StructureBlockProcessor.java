@@ -1,6 +1,5 @@
 package code.frfole.kb;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;

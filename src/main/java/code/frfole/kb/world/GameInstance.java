@@ -1,12 +1,12 @@
 package code.frfole.kb.world;
 
 import code.frfole.kb.StructureBlockProcessor;
+import code.frfole.kb.block.JumpPadHandler;
 import code.frfole.kb.world.zone.Flag;
 import code.frfole.kb.world.zone.Zone;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.IChunkLoader;
@@ -87,6 +87,11 @@ public class GameInstance extends InstanceContainer {
                 case CORNER -> {
                     if (value.equals("core:spawn")) {
                         setTag(Tag.Structure("spawn", Pos.class), Pos.fromPoint(blockPos).add(0.5, 0, 0.5));
+                    } else if (value.equals("core:jump_pad")) {
+                        setBlock(blockPos, Block.GRAY_CARPET
+                                .withTag(JumpPadHandler.JUMP_POWER_TAG, 30f)
+                                .withTag(JumpPadHandler.DECAY_TIME_TAG, Long.MAX_VALUE)
+                                .withHandler(JumpPadHandler.INSTANCE));
                     } else if (value.startsWith("config:")) {
                         String[] split = value.substring(7).split("/");
                         if (split.length != 2) throw new RuntimeException("Invalid config: " + value);
@@ -118,11 +123,5 @@ public class GameInstance extends InstanceContainer {
         zonesTemp.forEach((s, zone) -> System.out.println(s + " " + zone));
 
         enableAutoChunkLoad(false);
-
-        eventNode().addListener(PlayerMoveEvent.class, event -> {
-            if (event.getNewPosition().y() < getTag(Tag.Integer("player_low").defaultValue(0))) {
-                event.getPlayer().teleport(getTag(Tag.Structure("spawn", Pos.class).defaultValue(Pos.ZERO)));
-            }
-        });
     }
 }
