@@ -45,7 +45,7 @@ public class EnderPearlEntity extends EntityProjectile {
     private static void onProjectileCollideEntity(@NotNull ProjectileCollideWithEntityEvent event) {
         if (event.getEntity().isRemoved()) return;
         Vec direction = event.getEntity().getPosition().direction();
-        event.getTarget().takeKnockback(1f, direction.x(), direction.z());
+        event.getTarget().takeKnockback(1f, direction.x(), -direction.z());
         teleportOwner(event.getCollisionPosition().add(0, 0.1, 0), event.getEntity());
         event.getEntity().remove();
     }

@@ -8,9 +8,12 @@ import code.frfole.kb.world.zone.Flag;
 import code.frfole.kb.world.zone.Zone;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -42,6 +45,7 @@ public class Main {
             player.getInventory().setItemStack(0, ItemStack.of(Material.STONE, 64));
             player.getInventory().setItemStack(1, ItemStack.of(Material.GRAY_CARPET, 1));
             player.getInventory().setItemStack(2, ItemStack.of(Material.ENDER_PEARL, 1));
+            player.getInventory().setItemStack(3, ItemStack.of(Material.STICK, 1));
         });
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerBlockPlaceEvent.class, event -> {
@@ -105,6 +109,24 @@ public class Main {
                 event.setCancelled(true);
             }
         });
+
+        MinecraftServer.getGlobalEventHandler().addListener(EntityAttackEvent.class, event -> {
+            if (event.getEntity() instanceof LivingEntity attacker) {
+                ItemStack attackItem = attacker.getItemInMainHand();
+                if (attackItem.material() == Material.STICK) {
+                    if (!(attacker.getInstance() instanceof GameInstance gameInstance)) return;
+                    Boolean flagValueAttacker = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, attacker.getPosition());
+                    Boolean flagValueTarget = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, event.getTarget().getPosition());
+                    if ((flagValueAttacker != null && flagValueAttacker) || (flagValueTarget != null && flagValueTarget)) {
+                        return;
+                    }
+                    Vec direction = attacker.getPosition().withPitch(0f).direction().neg();
+                    event.getTarget().takeKnockback(1.0f, direction.x(), direction.z());
+                }
+            }
+        });
+
+        MinecraftServer.getCommandManager().register(new DebugCommand("debug", "test"));
 
         server.start("localhost", 25565);
     }
