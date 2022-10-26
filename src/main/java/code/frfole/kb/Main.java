@@ -2,6 +2,7 @@ package code.frfole.kb;
 
 import code.frfole.kb.block.DecayHandler;
 import code.frfole.kb.block.JumpPadHandler;
+import code.frfole.kb.command.DebugCommand;
 import code.frfole.kb.command.VoteCommand;
 import code.frfole.kb.entity.EnderPearlEntity;
 import code.frfole.kb.game.GameManager;
@@ -18,10 +19,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.ItemUpdateStateEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerItemAnimationEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.SetCooldownPacket;
@@ -60,6 +58,7 @@ public class Main {
                                         .withTag(JumpPadHandler.DECAY_TIME_TAG, System.currentTimeMillis() + JumpPadHandler.DECAY_TIME)
                                         .withHandler(JumpPadHandler.INSTANCE));
                             } else if (handItem.material() == Material.STONE) {
+                                Statistic.BLOCKS_PLACED.modify(player, i -> i + 1L);
                                 event.setBlock(event.getBlock().withHandler(DecayHandler.INSTANCE));
                             }
                         } else {
@@ -67,11 +66,20 @@ public class Main {
                         }
                     }
                 })
-                .addListener(PlayerMoveEvent.class, event -> {
+                .addListener(PlayerTickEvent.class, event -> {
                     Player player = event.getPlayer();
                     //noinspection UnstableApiUsage
-                    if (event.getNewPosition().y() < event.getInstance().getTag(Tag.Integer("player_low").defaultValue(0))
+                    if (player.getPosition().y() < event.getInstance().getTag(Tag.Integer("player_low").defaultValue(0))
                             && !player.getTag(Tags.HAS_FLYING_PEARL)) {
+                        Statistic.DEATHS.modify(player, Statistic.OP_INCREMENT);
+                        Tags.HitRecord hitRecord = player.getTag(Tags.LAST_HIT);
+                        if (hitRecord != null && !hitRecord.attacker().equals(player.getUuid()) && hitRecord.time() < System.currentTimeMillis() + 15000) {
+                            Player attacker = MinecraftServer.getConnectionManager().getPlayer(hitRecord.attacker());
+                            if (attacker != null) {
+                                Statistic.KILLS.modify(attacker, Statistic.OP_INCREMENT);
+                            }
+                            player.removeTag(Tags.LAST_HIT);
+                        }
                         //noinspection UnstableApiUsage
                         player.sendPacket(new SetCooldownPacket(Material.ENDER_PEARL.id(), 0));
                         //noinspection UnstableApiUsage

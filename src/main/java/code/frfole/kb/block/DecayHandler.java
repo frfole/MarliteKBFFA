@@ -44,14 +44,14 @@ public class DecayHandler implements BlockHandler {
         int decay = block.getTag(DECAY_TAG);
         int decayId = block.getTag(DECAY_ID_TAG.defaultValue(ThreadLocalRandom.current().nextInt()));
         if (decay >= stages.length) {
-            tick.getInstance().setBlock(tick.getBlockPosition(), Block.AIR);
+            tick.getInstance().scheduleNextTick(instance -> instance.setBlock(tick.getBlockPosition(), Block.AIR));
             return;
         }
         long decayTime = stages[decay];
         Block newBlock = block.withTag(DECAY_TIME_TAG, System.currentTimeMillis() + decayTime)
                 .withTag(DECAY_ID_TAG, decayId)
                 .withTag(DECAY_TAG, decay + 1);
-        tick.getInstance().setBlock(tick.getBlockPosition(), newBlock);
+        tick.getInstance().scheduleNextTick(instance -> instance.setBlock(tick.getBlockPosition(), newBlock));
         tick.getInstance().sendGroupedPacket(new BlockBreakAnimationPacket(decayId, tick.getBlockPosition(), (byte) (decay - 1)));
     }
 

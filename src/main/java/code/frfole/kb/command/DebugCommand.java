@@ -1,4 +1,4 @@
-package code.frfole.kb;
+package code.frfole.kb.command;
 
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentLiteral;

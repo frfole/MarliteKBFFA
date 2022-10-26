@@ -9,6 +9,7 @@ import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.ProjectileMeta;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.item.ItemUpdateStateEvent;
@@ -42,7 +43,13 @@ public final class CombatListener {
                 if (!(hitEvent.getTarget().getInstance() instanceof GameInstance gameInstance2)) return;
                 Boolean flagValueTarget = Zone.flagValue(gameInstance2.zones.values(), Flag.FlagType.SAFE, hitEvent.getTarget().getPosition());
                 if (flagValueTarget != null && flagValueTarget) {
+                    if (hitEvent.getEntity().getEntityMeta() instanceof ProjectileMeta projectileMeta && projectileMeta.getShooter() instanceof Player shooter) {
+                        shooter.getInventory().addItemStack(ItemStack.of(Material.ARROW, 1));
+                    }
                     return;
+                }
+                if (hitEvent.getEntity().getEntityMeta() instanceof ProjectileMeta projectileMeta && projectileMeta.getShooter() != null) {
+                    hitEvent.getTarget().setTag(Tags.LAST_HIT, new Tags.HitRecord(projectileMeta.getShooter()));
                 }
                 Vec direction = hitEvent.getEntity().getPosition().withPitch(0).direction();
                 hitEvent.getTarget().takeKnockback((float) (power * 0.54), -direction.x(), -direction.z());
@@ -66,6 +73,7 @@ public final class CombatListener {
                     return;
                 }
                 Vec direction = attacker.getPosition().withPitch(0f).direction().neg();
+                event.getTarget().setTag(Tags.LAST_HIT, new Tags.HitRecord(attacker.getUuid(), System.currentTimeMillis()));
                 event.getTarget().takeKnockback(1.0f, direction.x(), direction.z());
             }
         }
