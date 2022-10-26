@@ -33,6 +33,7 @@ public final class CombatListener {
             if (flagValueShooter != null && flagValueShooter) {
                 return;
             }
+            // TODO: consume arrow
 
             final EntityProjectile projectile = new EntityProjectile(event.getPlayer(), EntityType.ARROW);
             projectile.scheduleRemove(Duration.ofSeconds(10));

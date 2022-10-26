@@ -2,50 +2,50 @@ package code.frfole.kb;
 
 import code.frfole.kb.block.DecayHandler;
 import code.frfole.kb.block.JumpPadHandler;
+import code.frfole.kb.command.VoteCommand;
 import code.frfole.kb.entity.EnderPearlEntity;
+import code.frfole.kb.game.GameManager;
+import code.frfole.kb.game.GameMap;
 import code.frfole.kb.world.GameInstance;
 import code.frfole.kb.world.zone.Flag;
 import code.frfole.kb.world.zone.Zone;
+import com.google.gson.Gson;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.ItemUpdateStateEvent;
-import net.minestom.server.event.player.*;
-import net.minestom.server.instance.AnvilLoader;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerItemAnimationEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.world.DimensionType;
 
-import java.util.UUID;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Main {
+    private static final Gson GSON = new Gson();
     public static void main(String[] args) {
         MinecraftServer server = MinecraftServer.init();
-
-        GameInstance gameMap = new GameInstance(UUID.randomUUID(), DimensionType.OVERWORLD, new AnvilLoader("worlds/KBFFA-test-alpha"));
-        MinecraftServer.getInstanceManager().registerInstance(gameMap);
+        GameMap[] maps;
+        try (FileReader fileReader = new FileReader("maps.json")) {
+            maps = GSON.fromJson(fileReader, GameMap[].class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        GameManager gameManager = new GameManager(maps);
+        //noinspection UnstableApiUsage
+        gameManager.hook(MinecraftServer.process());
+        MinecraftServer.getCommandManager().register(new VoteCommand("vote", gameManager));
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(PlayerLoginEvent.class, event -> {
-                    event.setSpawningInstance(gameMap);
-                    Player player = event.getPlayer();
-                    //noinspection UnstableApiUsage
-                    player.setRespawnPoint(gameMap.getTag(Tag.Structure("spawn", Pos.class).defaultValue(Pos.ZERO)));
-                    player.setGameMode(GameMode.SURVIVAL);
-                    player.getInventory().setItemStack(0, ItemStack.of(Material.STONE, 64));
-                    player.getInventory().setItemStack(1, ItemStack.of(Material.GRAY_CARPET, 1));
-                    player.getInventory().setItemStack(2, ItemStack.of(Material.ENDER_PEARL, 1));
-                    player.getInventory().setItemStack(3, ItemStack.of(Material.STICK, 1));
-                    player.getInventory().setItemStack(4, ItemStack.of(Material.BOW, 1));
-                    player.getInventory().setItemStack(5, ItemStack.of(Material.ARROW, 1));
-                })
                 .addListener(PlayerBlockPlaceEvent.class, event -> {
                     Player player = event.getPlayer();
                     if (player.getInstance() instanceof GameInstance gameInstance) {
@@ -66,7 +66,8 @@ public class Main {
                             event.setCancelled(true);
                         }
                     }
-                }).addListener(PlayerMoveEvent.class, event -> {
+                })
+                .addListener(PlayerMoveEvent.class, event -> {
                     Player player = event.getPlayer();
                     //noinspection UnstableApiUsage
                     if (event.getNewPosition().y() < event.getInstance().getTag(Tag.Integer("player_low").defaultValue(0))
@@ -76,7 +77,8 @@ public class Main {
                         //noinspection UnstableApiUsage
                         player.teleport(event.getInstance().getTag(Tag.Structure("spawn", Pos.class).defaultValue(Pos.ZERO)));
                     }
-                }).addListener(PlayerUseItemEvent.class, event -> {
+                })
+                .addListener(PlayerUseItemEvent.class, event -> {
                     ItemStack itemStack = event.getItemStack();
                     Player player = event.getPlayer();
                     if (itemStack.material() == Material.ENDER_PEARL) {
