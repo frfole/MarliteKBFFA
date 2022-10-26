@@ -28,10 +28,13 @@ public final class CombatListener {
             //noinspection UnstableApiUsage
             final double power = MathUtils.clamp((chargedFor * chargedFor + 2 * chargedFor) / 2D, 0, 1);
 
-            if (power <= 0.2) return;
-            if (!(player.getInstance() instanceof GameInstance gameInstance)) return;
+            if (power <= 0.2 || !(player.getInstance() instanceof GameInstance gameInstance)) {
+                player.getInventory().update();
+                return;
+            }
             Boolean flagValueShooter = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, player.getPosition());
             if (flagValueShooter != null && flagValueShooter) {
+                player.getInventory().update();
                 return;
             }
             // TODO: consume arrow

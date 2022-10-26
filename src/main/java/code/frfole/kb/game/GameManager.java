@@ -8,6 +8,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
 
@@ -94,6 +96,11 @@ public final class GameManager {
         for (Player player : previousInstance.getPlayers()) {
             PlayerManager.refillItems(player);
             PlayerManager.setStatus(player, currentInstance);
+            if (player.hasTag(Tags.HAS_FLYING_PEARL)) {
+                player.setTag(Tags.HAS_FLYING_PEARL, false);
+                //noinspection UnstableApiUsage
+                player.sendPacket(new SetCooldownPacket(Material.ENDER_PEARL.id(), 0));
+            }
             // we can use getRespawnPoint() because we already set the new respawn point
             player.setInstance(currentInstance, player.getRespawnPoint());
         }
