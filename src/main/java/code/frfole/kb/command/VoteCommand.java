@@ -25,6 +25,7 @@ public class VoteCommand extends Command {
 
         addSyntax(this::vote, argMap);
         addSyntax(this::unvote, new ArgumentLiteral("unvote"));
+        addSyntax(this::info);
         addSyntax(this::info, new ArgumentLiteral("info"));
     }
 

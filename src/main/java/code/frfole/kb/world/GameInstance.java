@@ -8,6 +8,7 @@ import code.frfole.kb.block.DecayHandler;
 import code.frfole.kb.block.JumpPadHandler;
 import code.frfole.kb.entity.EnderPearlEntity;
 import code.frfole.kb.game.GameMap;
+import code.frfole.kb.game.PlayerManager;
 import code.frfole.kb.world.zone.Flag;
 import code.frfole.kb.world.zone.Zone;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -26,6 +27,7 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.SetCooldownPacket;
@@ -158,12 +160,22 @@ public class GameInstance extends InstanceContainer {
         eventNode().addListener(EntityAttackEvent.class, CombatListener::onAttack)
                 .addListener(ItemUpdateStateEvent.class, CombatListener::onItemUpdateState)
                 .addListener(PlayerItemAnimationEvent.class, event -> {
-                    if (event.getItemAnimationType() == PlayerItemAnimationEvent.ItemAnimationType.BOW)
-                        event.getPlayer().setTag(Tags.BOW_CHARGE_START, System.currentTimeMillis());
+                    if (event.getItemAnimationType() == PlayerItemAnimationEvent.ItemAnimationType.BOW) {
+                        if (event.getPlayer().getInventory().takeItemStack(ItemStack.of(Material.ARROW, 1), TransactionOption.DRY_RUN)) {
+                            event.getPlayer().setTag(Tags.BOW_CHARGE_START, System.currentTimeMillis());
+                        } else {
+                            event.setCancelled(true);
+                        }
+                    }
                 })
                 .addListener(EntityDamageEvent.class, event -> {
                     if (event.getDamageType() == DamageType.VOID && event.getEntity() instanceof Player)
                         event.setCancelled(true);
+                })
+                .addListener(PlayerChangeHeldSlotEvent.class, event -> {
+                    if (event.getPlayer().getHeldSlot() != event.getSlot()) {
+                        event.getPlayer().removeTag(Tags.BOW_CHARGE_START);
+                    }
                 })
                 .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
                 .addListener(PlayerBlockPlaceEvent.class, this::onPlace)
@@ -181,7 +193,7 @@ public class GameInstance extends InstanceContainer {
         ItemStack handItem = player.getItemInHand(event.getHand());
         event.consumeBlock(false);
         if (handItem.material() == Material.GRAY_CARPET) {
-            // TODO: consume block
+            event.consumeBlock(true);
             event.setBlock(event.getBlock()
                     .withTag(JumpPadHandler.JUMP_POWER_TAG, 30f)
                     .withTag(JumpPadHandler.DECAY_TIME_TAG, System.currentTimeMillis() + JumpPadHandler.DECAY_TIME)
@@ -208,6 +220,7 @@ public class GameInstance extends InstanceContainer {
             //noinspection UnstableApiUsage
             player.sendPacket(new SetCooldownPacket(Material.ENDER_PEARL.id(), 0));
             player.teleport(this.getTag(Tags.MAP_SPAWN));
+            PlayerManager.refillItems(player);
         }
     }
 
@@ -222,7 +235,7 @@ public class GameInstance extends InstanceContainer {
                 player.sendPacket(new SetCooldownPacket(Material.ENDER_PEARL.id(), 0));
                 return;
             }
-            // TODO: consume ender pearl
+            player.setItemInHand(event.getHand(), player.getItemInHand(event.getHand()).withAmount(i -> i - 1));
             EnderPearlEntity entity = new EnderPearlEntity(player);
             final Pos position = player.getPosition().add(0, player.getEyeHeight(), 0);
             entity.setInstance(this, position);

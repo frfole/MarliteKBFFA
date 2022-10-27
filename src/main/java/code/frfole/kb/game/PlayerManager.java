@@ -36,7 +36,8 @@ public final class PlayerManager {
 
     private void onLogin(@NotNull PlayerLoginEvent event) {
         UUID uuid = event.getPlayer().getUuid();
-        try (FileInputStream inputStream = new FileInputStream("players/" + uuid + ".dat")) {
+        try (FileInputStream fis = new FileInputStream("players/" + uuid + ".dat");
+             BufferedInputStream inputStream = new BufferedInputStream(fis)) {
             deserialize(event.getPlayer(), inputStream);
         } catch (FileNotFoundException ignored) {
         } catch (IOException | NBTException e) {
@@ -52,7 +53,8 @@ public final class PlayerManager {
             //noinspection ResultOfMethodCallIgnored
             file.getParentFile().mkdirs();
         }
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        try (FileOutputStream fos = new FileOutputStream(file);
+             BufferedOutputStream outputStream = new BufferedOutputStream(fos)) {
             serialize(event.getPlayer(), outputStream);
             outputStream.flush();
         } catch (IOException e) {

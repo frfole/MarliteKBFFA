@@ -13,9 +13,9 @@ import net.minestom.server.entity.metadata.ProjectileMeta;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.item.ItemUpdateStateEvent;
+import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -24,9 +24,13 @@ public final class CombatListener {
     public static void onItemUpdateState(ItemUpdateStateEvent event) {
         if (event.getItemStack().material() == Material.BOW) {
             final Player player = event.getPlayer();
-            final double chargedFor = (System.currentTimeMillis() - player.getTag(Tags.BOW_CHARGE_START)) / 1000D;
-            //noinspection UnstableApiUsage
-            final double power = MathUtils.clamp((chargedFor * chargedFor + 2 * chargedFor) / 2D, 0, 1);
+            long chargeTime = System.currentTimeMillis() - player.getTag(Tags.BOW_CHARGE_START);
+            if (chargeTime <= 0) {
+                player.getInventory().update();
+                return;
+            }
+            final double chargedFor = Math.min(chargeTime, 1000) / 1000D;
+            final double power = Math.max(Math.min((chargedFor * chargedFor + 2 * chargedFor) / 2D, 1), 0);
 
             if (power <= 0.2 || !(player.getInstance() instanceof GameInstance gameInstance)) {
                 player.getInventory().update();
@@ -36,7 +40,9 @@ public final class CombatListener {
                 player.getInventory().update();
                 return;
             }
-            // TODO: consume arrow
+            if (!player.getInventory().takeItemStack(ItemStack.of(Material.ARROW, 1), TransactionOption.ALL_OR_NOTHING)) {
+                return;
+            }
 
             final EntityProjectile projectile = new EntityProjectile(event.getPlayer(), EntityType.ARROW);
             projectile.scheduleRemove(Duration.ofSeconds(10));
