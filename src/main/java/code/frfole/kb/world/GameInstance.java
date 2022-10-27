@@ -20,10 +20,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.ItemUpdateStateEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerItemAnimationEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.DynamicChunk;
@@ -170,6 +167,7 @@ public class GameInstance extends InstanceContainer {
                 })
                 .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
                 .addListener(PlayerBlockPlaceEvent.class, this::onPlace)
+                .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
                 .addListener(PlayerTickEvent.class, this::onPlayerTick)
                 .addListener(PlayerUseItemEvent.class, this::onPlayerUseItem);
     }

@@ -1,6 +1,7 @@
 package code.frfole.kb;
 
 import code.frfole.kb.command.DebugCommand;
+import code.frfole.kb.command.StatsCommand;
 import code.frfole.kb.command.VoteCommand;
 import code.frfole.kb.game.GameManager;
 import code.frfole.kb.game.GameMap;
@@ -31,6 +32,7 @@ public class Main {
 
         MinecraftServer.getCommandManager().register(new VoteCommand("vote", gameManager));
         MinecraftServer.getCommandManager().register(new DebugCommand("debug", "test"));
+        MinecraftServer.getCommandManager().register(new StatsCommand("stats", "stat", "s"));
 
         server.start("localhost", 25565);
     }

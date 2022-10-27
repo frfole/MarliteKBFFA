@@ -1,8 +1,5 @@
 package code.frfole.kb.command;
 
-import code.frfole.kb.Statistic;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentLiteral;
 import net.minestom.server.entity.Entity;
@@ -26,17 +23,5 @@ public class DebugCommand extends Command {
                 });
             }
         }, new ArgumentLiteral("fakeplayer"));
-
-        addSyntax((sender, context) -> {
-            TextComponent.Builder text = Component.text();
-            text.append(Component.text("Statistic:"));
-            for (Statistic<?> value : Statistic.VALUES) {
-                text.append(Component.newline(),
-                        Component.text(value.name()),
-                        Component.text(": "),
-                        Component.text(value.get(sender).toString()));
-            }
-            sender.sendMessage(text.build());
-        }, new ArgumentLiteral("stats"));
     }
 }
