@@ -61,4 +61,18 @@ public record Zone(Point posMin, Point posMax, Set<Flag> flags) {
         }
         return null;
     }
+
+    /**
+     * Gets the value of given flag from collection of zone for the given point.
+     * @param zones The collection of zones to check.
+     * @param flagType The flag type to get.
+     * @param point The point to check.
+     * @param defaultValue The default value to return if the flag is not set.
+     * @return The value of the flag, or defaultValue if the flag is not set.
+     */
+    @Contract(pure = true)
+    public static boolean flagValue(Collection<Zone> zones, Flag.FlagType flagType, Point point, boolean defaultValue) {
+        Boolean value = flagValue(zones, flagType, point);
+        return value == null ? defaultValue : value;
+    }
 }

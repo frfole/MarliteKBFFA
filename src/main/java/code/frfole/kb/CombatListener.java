@@ -32,8 +32,7 @@ public final class CombatListener {
                 player.getInventory().update();
                 return;
             }
-            Boolean flagValueShooter = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, player.getPosition());
-            if (flagValueShooter != null && flagValueShooter) {
+            if (Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, player.getPosition(), false)) {
                 player.getInventory().update();
                 return;
             }
@@ -44,8 +43,7 @@ public final class CombatListener {
             //noinspection UnstableApiUsage
             projectile.eventNode().addListener(ProjectileCollideWithEntityEvent.class, hitEvent -> {
                 if (!(hitEvent.getTarget().getInstance() instanceof GameInstance gameInstance2)) return;
-                Boolean flagValueTarget = Zone.flagValue(gameInstance2.zones.values(), Flag.FlagType.SAFE, hitEvent.getTarget().getPosition());
-                if (flagValueTarget != null && flagValueTarget) {
+                if (Zone.flagValue(gameInstance2.zones.values(), Flag.FlagType.SAFE, hitEvent.getTarget().getPosition(), false)) {
                     if (hitEvent.getEntity().getEntityMeta() instanceof ProjectileMeta projectileMeta && projectileMeta.getShooter() instanceof Player shooter) {
                         shooter.getInventory().addItemStack(ItemStack.of(Material.ARROW, 1));
                     }
@@ -70,9 +68,8 @@ public final class CombatListener {
             ItemStack attackItem = attacker.getItemInMainHand();
             if (attackItem.material() == Material.STICK) {
                 if (!(attacker.getInstance() instanceof GameInstance gameInstance)) return;
-                Boolean flagValueAttacker = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, attacker.getPosition());
-                Boolean flagValueTarget = Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, event.getTarget().getPosition());
-                if ((flagValueAttacker != null && flagValueAttacker) || (flagValueTarget != null && flagValueTarget)) {
+                if (Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, attacker.getPosition(), false)
+                        || Zone.flagValue(gameInstance.zones.values(), Flag.FlagType.SAFE, event.getTarget().getPosition(), false)) {
                     return;
                 }
                 Vec direction = attacker.getPosition().withPitch(0f).direction().neg();

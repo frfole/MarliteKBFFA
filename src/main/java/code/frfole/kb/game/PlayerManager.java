@@ -1,8 +1,8 @@
 package code.frfole.kb.game;
 
 import code.frfole.kb.Statistic;
+import code.frfole.kb.Tags;
 import net.minestom.server.ServerProcess;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -15,7 +15,6 @@ import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.player.PlayerConnection;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.*;
@@ -89,8 +88,7 @@ public final class PlayerManager {
     }
 
     public static void setStatus(@NotNull Player player, @NotNull Instance instance) {
-        //noinspection UnstableApiUsage
-        player.setRespawnPoint(instance.getTag(Tag.Structure("spawn", Pos.class).defaultValue(Pos.ZERO)));
+        player.setRespawnPoint(instance.getTag(Tags.MAP_SPAWN));
         player.setGameMode(GameMode.SURVIVAL);
     }
 

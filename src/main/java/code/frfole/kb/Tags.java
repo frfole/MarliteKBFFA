@@ -1,5 +1,6 @@
 package code.frfole.kb;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 
@@ -11,6 +12,8 @@ public final class Tags {
     @SuppressWarnings("UnstableApiUsage")
     public static final Tag<HitRecord> LAST_HIT = Tag.Structure("lastHit", HitRecord.class);
     public static final Tag<Integer> VOTED_MAP = Tag.Integer("votedMap").defaultValue(-1);
+    @SuppressWarnings("UnstableApiUsage")
+    public static final Tag<Pos> MAP_SPAWN = Tag.Structure("spawn", Pos.class).defaultValue(Pos.ZERO);
 
     public record HitRecord(UUID attacker, long time) {
         public HitRecord(Entity attacker) {
