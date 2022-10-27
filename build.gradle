@@ -12,7 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.Minestom:Minestom:9dab3183e5'
+    implementation('com.github.Minestom:Minestom:d7e958fa07') {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    implementation('com.google.code.gson:gson:2.10')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'

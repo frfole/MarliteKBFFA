@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -55,13 +54,13 @@ public class GameInstance extends InstanceContainer {
         super(uniqueId, DimensionType.OVERWORLD, new AnvilLoader(gameMap.dir()));
 
         // load chunks
-        Vec sub = gameMap.boundsMax().sub(gameMap.boundsMin()).add(1, 0, 1);
-        int totalArea = sub.blockX() * sub.blockZ();
+        int totalArea = gameMap.area();
+        System.out.println(totalArea);
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         AtomicInteger counter = new AtomicInteger(0);
-        for (int x = gameMap.boundsMin().blockX(); x <= gameMap.boundsMax().blockX(); ++x) {
-            for (int z = gameMap.boundsMin().blockZ(); z <= gameMap.boundsMax().blockZ(); ++z) {
-                loadChunk(x, z).thenAccept(chunk -> {
+        for (int chunkX = gameMap.boundsX().min(); chunkX <= gameMap.boundsX().max(); ++chunkX) {
+            for (int chunkZ = gameMap.boundsZ().min(); chunkZ <= gameMap.boundsZ().max(); ++chunkZ) {
+                loadChunk(chunkX, chunkZ).thenAccept(chunk -> {
                     if (counter.incrementAndGet() == totalArea) {
                         completableFuture.complete(null);
                     }
@@ -73,8 +72,8 @@ public class GameInstance extends InstanceContainer {
         // scan loaded chunks for structure blocks and replace them with air
         HashSet<Point> toAir = new HashSet<>();
         HashMap<Point, StructureBlockProcessor.BlockData> toProcess = new HashMap<>();
-        for (int chunkX = gameMap.boundsMin().blockX(); chunkX <= gameMap.boundsMax().blockX(); ++chunkX) {
-            for (int chunkZ = gameMap.boundsMin().blockZ(); chunkZ <= gameMap.boundsMax().blockZ(); ++chunkZ) {
+        for (int chunkX = gameMap.boundsX().min(); chunkX <= gameMap.boundsX().max(); ++chunkX) {
+            for (int chunkZ = gameMap.boundsZ().min(); chunkZ <= gameMap.boundsZ().max(); ++chunkZ) {
                 Chunk chunk = getChunk(chunkX, chunkZ);
                 if (chunk instanceof DynamicChunk dynamicChunk) {
                     try {

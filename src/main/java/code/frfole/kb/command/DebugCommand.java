@@ -21,7 +21,6 @@ public class DebugCommand extends Command {
             if (sender instanceof Entity entity) {
                 UUID uuid = UUID.randomUUID();
                 FakePlayer.initPlayer(uuid, uuid.toString().substring(0, 16), fakePlayer -> {
-//                    fakePlayer.setInstance(entity.getInstance());
                     fakePlayer.teleport(entity.getPosition());
                     fakePlayer.scheduleRemove(Duration.ofSeconds(60));
                 });
